@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+
+for librarys in $(grep path "${HOME}/.steam/steam/steamapps/libraryfolders.vdf" | awk -F' ' '{print $2}');do
+	for pfx in $(ls "${librarys//\"/}/steamapps/compatdata");do
+		grep -Poz '"apps"\s*\{\K([^}]*)' "${HOME}/.steam/steam/steamapps/libraryfolders.vdf" | awk -F' ' '{print $1}' | grep -qo "${pfx}" || {
+			size=$(du -sh "${librarys//\"/}/steamapps/compatdata/${pfx}" | awk -F' ' '{print $1}')
+			echo "Apagando: ${librarys//\"/}/steamapps/compatdata/${pfx}		Liberado: ${size}"
+			rm -rf "${librarys//\"/}/steamapps/compatdata/${pfx}"
+		}
+	done
+done
