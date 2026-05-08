@@ -4,3 +4,8 @@
 ### Esse script mostra o tamanho da pasta que sera removido e o nome do jogo a quem pertencia.
 ### Obs: A Steam atualiza apenas quando encerra/inicia
 # BETA
+
+Basta executar:
+```
+$ pfxcleaner
+```
