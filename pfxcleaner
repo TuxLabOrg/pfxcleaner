@@ -1,18 +1,28 @@
 #!/usr/bin/env bash
 
+# Consulta o nome usando a API da Steam
+g_name(){
+	game_name=$(curl -s "https://store.steampowered.com/api/appdetails?appids=${1}" | tr "\," "\n" | grep -oPm1 '"name":"\K[^"]+')
+	[[ -n "${game_name}" ]] && game_name="Game: ${game_name}"
+}
+
+# Arquivo principal no diretorio base da Steam
 libraryfolders="${HOME}/.steam/steam/steamapps/libraryfolders.vdf"
 
+# Verifica se a steam esta instalada
 [[ ! -e "${libraryfolders}" ]] && {
 	echo "${libraryfolders} Não encontrado, Steam instalada?"
 	exit 1
 }
 
+# Verifica em todas as bibliotecas Steam de jogos por compatdata de jogos desinstalados e apaga
 for librarys in $(grep path "${libraryfolders}" | awk -F' ' '{print $2}');do
 	[[ ! -e "${librarys//\"/}/steamapps/compatdata" ]] && continue
 	for pfx in $(ls "${librarys//\"/}/steamapps/compatdata");do
 		grep -Poz '"apps"\s*\{\K([^}]*)' "${libraryfolders}" | awk -F' ' '{print $1}' | grep -qo "${pfx}" || {
 			size=$(du -sh "${librarys//\"/}/steamapps/compatdata/${pfx}" | awk -F' ' '{print $1}')
-			echo "Apagando: ${librarys//\"/}/steamapps/compatdata/${pfx}		Liberado: ${size}"
+			g_name "${pfx}"
+			echo "Apagando: ${librarys//\"/}/steamapps/compatdata/${pfx}			${game_name}	Liberado: ${size}"
 			rm -rf "${librarys//\"/}/steamapps/compatdata/${pfx}"
 		}
 	done
